@@ -1683,7 +1683,7 @@ function ActiveAgentComposer({
         clearDraft={agentInputDraft.clear}
         editingSession={editingSession}
         autoFocus
-        autoFocusKey={String(agentInputDraft.attachmentFocusRequestId)}
+        autoFocusKey={`${agentInputDraft.attachmentFocusRequestId}:${isPaneFocused}`}
         isSubmitLoading={isSubmitLoading}
         onAttentionInputFocus={onAttentionInputFocus}
         onAttentionPromptSend={onAttentionPromptSend}
