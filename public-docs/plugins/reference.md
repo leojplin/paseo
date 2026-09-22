@@ -1374,7 +1374,7 @@ Every callback receives:
 | `agent`                   | Agent               | Synchronous matching agent snapshot.                                                                            |
 | `openPanel(id, options?)` | Workspace and agent | Opens a registered panel in the callback's current context. Pass `{ location: "explorer" }` to target Explorer. |
 
-`navigation.openWorkspace({ workspaceId })` focuses a workspace. `navigation.openAgent({ agentId, workspaceId? })` focuses an agent; pass `workspaceId` when the agent has not reached the client cache yet. An agent callback may open either an agent panel or a workspace panel. A workspace callback may open only a workspace panel. Unknown surface and panel IDs fail visibly. Use `paseo` for normal workspace, agent, provider, and daemon-config operations. Use `rpc` for plugin-specific filesystem, credential, vendor, or daemon-local work.
+`navigation.openWorkspace({ workspaceId })` focuses a workspace. `navigation.openAgent({ agentId, workspaceId? })` focuses an agent; pass `workspaceId` when the agent has not reached the client cache yet. Current hosts also expose `navigation.openWorkspaceAgentCreation(...)` for a combined workspace-plus-agent request: it opens a draft tab immediately, then retargets that tab when `agentCreation.result` resolves. An agent callback may open either an agent panel or a workspace panel. A workspace callback may open only a workspace panel. Unknown surface and panel IDs fail visibly. Use `paseo` for normal workspace, agent, provider, and daemon-config operations. Use `rpc` for plugin-specific filesystem, credential, vendor, or daemon-local work.
 
 ## Slash commands
 

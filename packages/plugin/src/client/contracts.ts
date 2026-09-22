@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { PaseoApi } from "@getpaseo/client";
+import type { PaseoAgent, PaseoApi, PaseoWorkspace } from "@getpaseo/client";
 import type { AgentTimelineItem } from "@getpaseo/protocol/agent-types";
 import type { ZodType, input as ZodInput, output as ZodOutput } from "zod";
 import type { PluginRpcContract } from "../rpc.js";
@@ -38,6 +38,27 @@ export interface PluginNavigationTarget {
   }) => void;
   readonly openWorkspace: (input: {
     readonly workspaceId: string;
+    readonly serverId?: string;
+  }) => void;
+}
+
+export interface PluginCommandNavigationTarget extends PluginNavigationTarget {
+  /** Opens a workspace immediately and retargets its draft tab when agent creation finishes. */
+  readonly openWorkspaceAgentCreation?: (input: {
+    readonly draftId: string;
+    readonly workspace: PaseoWorkspace;
+    readonly setup: {
+      readonly provider: string;
+      readonly cwd: string;
+      readonly modeId?: string | null;
+      readonly model?: string | null;
+      readonly thinkingOptionId?: string | null;
+      readonly featureValues?: Readonly<Record<string, unknown>>;
+    };
+    readonly agentCreation: {
+      readonly result: Promise<PaseoAgent>;
+      readonly retry: () => Promise<PaseoAgent>;
+    };
     readonly serverId?: string;
   }) => void;
 }
@@ -179,7 +200,7 @@ export interface PluginTimelineRendererContribution<Schema extends ZodType = Zod
 
 export interface PluginCommandCapabilities {
   paseo: PaseoApi;
-  navigation: PluginNavigationTarget;
+  navigation: PluginCommandNavigationTarget;
   rpc<InputSchema extends ZodType, OutputSchema extends ZodType>(
     contract: PluginRpcContract<InputSchema, OutputSchema>,
     input: ZodInput<InputSchema>,
