@@ -93,6 +93,7 @@ export type PluginClientRuntime = Pick<
   PluginClientContext,
   | "playAudio"
   | "paseo"
+  | "navigation"
   | "rpc"
   | "openSettings"
   | "openScreen"

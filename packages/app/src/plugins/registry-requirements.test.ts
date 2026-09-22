@@ -28,6 +28,7 @@ function registry(version: string) {
         rpc: async () => {
           throw new Error("No RPC in this plugin");
         },
+        navigation: { openAgent() {}, openWorkspace() {} },
         openSettings() {
           cleanups++;
         },

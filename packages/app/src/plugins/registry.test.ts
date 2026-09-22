@@ -11,6 +11,7 @@ vi.mock("./navigation", () => ({
 vi.mock("./client-runtime", () => ({
   createPluginClientRuntime: () => ({
     paseo: { dispose: async () => {} },
+    navigation: { openAgent: () => {}, openWorkspace: () => {} },
     rpc: async () => undefined,
     openSurface: () => undefined,
     openPanel: () => undefined,

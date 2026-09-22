@@ -2,6 +2,7 @@ import { buildPluginSettingsRoute } from "./settings/routes";
 import { router } from "expo-router";
 import type { PluginPanelLocation } from "@getpaseo/plugin/client";
 import { navigateToWorkspace } from "@/stores/navigation-active-workspace-store";
+import { navigateToAgent } from "@/utils/navigate-to-agent";
 import { useWorkspaceLayoutStore } from "@/stores/workspace-layout-store";
 import { buildPluginSurfaceRoute } from "./routes";
 import type { PluginNavigation } from "./actions";
@@ -20,6 +21,19 @@ export function createPluginNavigation(input: {
     return { mode: "pane" as const, paneId };
   }
   return {
+    openAgent({ agentId, workspaceId: targetWorkspaceId, serverId: targetServerId }) {
+      navigateToAgent({
+        serverId: targetServerId ?? serverId,
+        agentId,
+        workspaceId: targetWorkspaceId,
+      });
+    },
+    openWorkspace({ workspaceId: targetWorkspaceId, serverId: targetServerId }) {
+      navigateToWorkspace({
+        serverId: targetServerId ?? serverId,
+        workspaceId: targetWorkspaceId,
+      });
+    },
     openSettings(pluginId, screenId) {
       router.push(buildPluginSettingsRoute(serverId, pluginId, screenId));
     },
