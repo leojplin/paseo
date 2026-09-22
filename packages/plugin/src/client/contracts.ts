@@ -30,6 +30,18 @@ export interface PluginHostProps {
   };
 }
 
+export interface PluginNavigationTarget {
+  readonly openAgent: (input: {
+    readonly agentId: string;
+    readonly workspaceId?: string;
+    readonly serverId?: string;
+  }) => void;
+  readonly openWorkspace: (input: {
+    readonly workspaceId: string;
+    readonly serverId?: string;
+  }) => void;
+}
+
 interface PluginNavigableHostProps extends PluginHostProps {
   /** Client-owned navigation. Undefined on older hosts; hide dependent affordances when absent. */
   readonly navigation?: {
@@ -39,11 +51,8 @@ interface PluginNavigableHostProps extends PluginHostProps {
       readonly workspaceId: string;
       readonly serverId?: string;
     }) => void;
-    readonly openAgent: (input: { readonly agentId: string; readonly serverId?: string }) => void;
-    readonly openWorkspace: (input: {
-      readonly workspaceId: string;
-      readonly serverId?: string;
-    }) => void;
+    readonly openAgent: PluginNavigationTarget["openAgent"];
+    readonly openWorkspace: PluginNavigationTarget["openWorkspace"];
   };
 }
 
@@ -170,6 +179,7 @@ export interface PluginTimelineRendererContribution<Schema extends ZodType = Zod
 
 export interface PluginCommandCapabilities {
   paseo: PaseoApi;
+  navigation: PluginNavigationTarget;
   rpc<InputSchema extends ZodType, OutputSchema extends ZodType>(
     contract: PluginRpcContract<InputSchema, OutputSchema>,
     input: ZodInput<InputSchema>,

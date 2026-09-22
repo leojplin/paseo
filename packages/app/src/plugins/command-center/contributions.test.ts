@@ -145,6 +145,8 @@ describe("plugin Command Center contributions", () => {
       runtime: createRuntime,
       state: stateSource(),
       navigation: {
+        openAgent() {},
+        openWorkspace() {},
         openSettings() {},
         openSurface() {},
         openWorkspacePanel() {},
@@ -196,6 +198,8 @@ describe("plugin Command Center contributions", () => {
       workspaceId: workspace.id,
       agentId: agent.id,
       navigation: {
+        openAgent() {},
+        openWorkspace() {},
         openSettings() {},
         openSurface(pluginId, surfaceId) {
           opened.push(`${pluginId}/surface/${surfaceId}`);
@@ -228,6 +232,8 @@ describe("plugin Command Center contributions", () => {
         workspaceId: workspace.id,
         agentId: agent.id,
         navigation: {
+          openAgent() {},
+          openWorkspace() {},
           openSettings() {},
           openSurface() {},
           openWorkspacePanel() {},

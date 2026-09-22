@@ -31,6 +31,7 @@ function registry() {
         rpc: async () => {
           throw new Error("Unexpected plugin RPC");
         },
+        navigation: { openAgent: () => {}, openWorkspace: () => {} },
         openSurface: () => {},
         openSettings: () => {},
         openPanel: () => {},

@@ -2,6 +2,7 @@ import { callPluginRpc } from "@getpaseo/plugin/client/host";
 import type {
   PluginAgentCommandContext,
   PluginCommandCapabilities,
+  PluginNavigationTarget,
   PluginPanelLocation,
   PluginWorkspaceCommandContext,
 } from "@getpaseo/plugin/client";
@@ -10,7 +11,7 @@ import { resolvePluginPanelOpenLocation } from "./workspace-panels/locations";
 import type { PluginSurfaceRuntime } from "./surface-runtime";
 import type { InstalledPlugin } from "./types";
 
-export interface PluginNavigation {
+export interface PluginNavigation extends PluginNavigationTarget {
   openSettings(pluginId: string, screenId: string): void;
   openSurface(pluginId: string, surfaceId: string): void;
   openWorkspacePanel(pluginId: string, panelId: string, location: PluginPanelLocation): void;
@@ -29,6 +30,10 @@ export function createPluginCapabilities(
 ): PluginCommandCapabilities {
   return {
     paseo: runtime.paseo,
+    navigation: {
+      openAgent: navigation.openAgent,
+      openWorkspace: navigation.openWorkspace,
+    },
     rpc: (contract, input) => callPluginRpc(contract, runtime.invoke, input),
     openSettings(screenId) {
       if (!plugin.settingsScreens.some((screen) => screen.id === screenId))
