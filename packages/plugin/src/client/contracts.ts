@@ -51,6 +51,7 @@ export interface PluginCommandNavigationTarget extends PluginNavigationTarget {
     readonly displayName?: string;
     readonly provider?: string;
     readonly model?: string;
+    readonly thinkingOptionId?: string;
   }) => void;
   /** Opens a workspace immediately and retargets its draft tab when agent creation finishes. */
   readonly openWorkspaceAgentCreation?: (input: {

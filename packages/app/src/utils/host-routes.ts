@@ -440,6 +440,7 @@ interface NewWorkspaceRouteOptions {
   draftId?: string;
   provider?: string;
   model?: string;
+  thinkingOptionId?: string;
 }
 
 function buildNewWorkspaceSearch(options: NewWorkspaceRouteOptions): string {
@@ -465,6 +466,9 @@ function buildNewWorkspaceSearch(options: NewWorkspaceRouteOptions): string {
   }
   if (options.model) {
     params.set("model", options.model);
+  }
+  if (options.thinkingOptionId) {
+    params.set("thinking", options.thinkingOptionId);
   }
   return params.toString();
 }

@@ -192,6 +192,7 @@ interface NewWorkspaceScreenProps {
   draftId?: string;
   initialProvider?: string;
   initialModel?: string;
+  initialThinkingOptionId?: string;
 }
 
 // A terminal launch sends argv, not a message: there is nothing to attach and
@@ -938,9 +939,10 @@ function buildComposerInitialValues(input: {
 function buildRouteComposerInitialValues(
   provider: string | undefined,
   model: string | undefined,
+  thinkingOptionId: string | undefined,
 ): CreateAgentInitialValues | undefined {
   if (!provider || !model) return undefined;
-  return { provider, model };
+  return { provider, model, thinkingOptionId };
 }
 
 const pendingWorkspaceSubmissions = new Map<string, Promise<SubmitOutcome>>();
@@ -1644,6 +1646,7 @@ export function NewWorkspaceScreen({
   draftId,
   initialProvider,
   initialModel,
+  initialThinkingOptionId,
 }: NewWorkspaceScreenProps) {
   const queryClient = useQueryClient();
   const { theme } = useUnistyles();
@@ -1778,7 +1781,11 @@ export function NewWorkspaceScreen({
   });
   const draftKey = buildNewWorkspaceDraftKey(draftId);
   const forkDraftSetup = usePendingWorkspaceDraftSetup(draftId);
-  const initialComposerValues = buildRouteComposerInitialValues(initialProvider, initialModel);
+  const initialComposerValues = buildRouteComposerInitialValues(
+    initialProvider,
+    initialModel,
+    initialThinkingOptionId,
+  );
   const draftContextScopeKey = useDraftWorkspaceAttachmentScopeKey(draftId);
   const visibleDraftContextScopeKeys = useMemo(
     () => resolveVisibleDraftContextScopeKeys({ isDraftHandoffActive, draftContextScopeKey }),

@@ -20,6 +20,7 @@ export default function NewWorkspaceRoute() {
     draftId?: string;
     provider?: string;
     model?: string;
+    thinking?: string;
   }>();
   const serverId = typeof params.serverId === "string" ? params.serverId : "";
   const sourceDirectory = typeof params.dir === "string" ? params.dir : undefined;
@@ -28,6 +29,7 @@ export default function NewWorkspaceRoute() {
   const draftId = typeof params.draftId === "string" ? params.draftId : undefined;
   const provider = typeof params.provider === "string" ? params.provider : undefined;
   const model = typeof params.model === "string" ? params.model : undefined;
+  const thinkingOptionId = typeof params.thinking === "string" ? params.thinking : undefined;
   const screenKey = JSON.stringify([
     serverId,
     sourceDirectory ?? null,
@@ -36,6 +38,7 @@ export default function NewWorkspaceRoute() {
     draftId ?? null,
     provider ?? null,
     model ?? null,
+    thinkingOptionId ?? null,
   ]);
 
   // The shell remounts this route when the viewport crosses the compact breakpoint;
@@ -59,6 +62,7 @@ export default function NewWorkspaceRoute() {
             draftId={draftId}
             initialProvider={provider}
             initialModel={model}
+            initialThinkingOptionId={thinkingOptionId}
           />
         </ComposerEditingScope>
       </WorkspaceComposerEditingSessionsProvider>

@@ -239,8 +239,9 @@ describe("global routes", () => {
         projectId: "project-1",
         provider: "pi-dev1",
         model: "model-1",
+        thinkingOptionId: "xhigh",
       }),
-    ).toBe("/new?serverId=local&projectId=project-1&provider=pi-dev1&model=model-1");
+    ).toBe("/new?serverId=local&projectId=project-1&provider=pi-dev1&model=model-1&thinking=xhigh");
   });
 
   it("buildNewWorkspaceRoute carries a draft context id", () => {
