@@ -11,6 +11,7 @@ export interface SidebarShortcutWorkspaceTarget {
 
 export interface SidebarShortcutModel {
   shortcutTargets: SidebarShortcutWorkspaceTarget[];
+  readyForReviewTargets: SidebarShortcutWorkspaceTarget[];
   shortcutIndexByWorkspaceKey: Map<string, number>;
 }
 
@@ -32,6 +33,7 @@ export function buildSidebarShortcutModel(input: {
   projects: SidebarProjectEntry[];
   collapsedProjectKeys: ReadonlySet<string>;
   shortcutLimit?: number;
+  readyForReviewWorkspaceKeys?: ReadonlySet<string>;
 }): SidebarShortcutModel {
   return buildSidebarShortcutSections({
     sections: input.projects.map((project) => ({
@@ -39,6 +41,7 @@ export function buildSidebarShortcutModel(input: {
       collapsed: input.collapsedProjectKeys.has(project.viewKey),
     })),
     shortcutLimit: input.shortcutLimit,
+    readyForReviewWorkspaceKeys: input.readyForReviewWorkspaceKeys,
   });
 }
 
@@ -46,6 +49,7 @@ export function buildStatusSidebarShortcutModel(input: {
   groups: readonly StatusGroup[];
   collapsedStatusGroupKeys?: ReadonlySet<string>;
   shortcutLimit?: number;
+  readyForReviewWorkspaceKeys?: ReadonlySet<string>;
 }): SidebarShortcutModel {
   return buildSidebarShortcutSections({
     sections: input.groups.map((group) => ({
@@ -53,15 +57,18 @@ export function buildStatusSidebarShortcutModel(input: {
       collapsed: input.collapsedStatusGroupKeys?.has(group.bucket),
     })),
     shortcutLimit: input.shortcutLimit,
+    readyForReviewWorkspaceKeys: input.readyForReviewWorkspaceKeys,
   });
 }
 
 export function buildSidebarShortcutSections(input: {
   sections: readonly SidebarShortcutSection[];
   shortcutLimit?: number;
+  readyForReviewWorkspaceKeys?: ReadonlySet<string>;
 }): SidebarShortcutModel {
   const maxShortcuts = Math.max(0, Math.floor(input.shortcutLimit ?? 9));
   const shortcutTargets: SidebarShortcutWorkspaceTarget[] = [];
+  const readyForReviewTargets: SidebarShortcutWorkspaceTarget[] = [];
   const shortcutIndexByWorkspaceKey = new Map<string, number>();
 
   for (const section of input.sections) {
@@ -70,14 +77,18 @@ export function buildSidebarShortcutSections(input: {
     }
 
     for (const workspace of section.workspaces) {
-      shortcutTargets.push(createShortcutTarget(workspace));
+      const target = createShortcutTarget(workspace);
+      shortcutTargets.push(target);
+      if (input.readyForReviewWorkspaceKeys?.has(workspace.workspaceKey)) {
+        readyForReviewTargets.push(target);
+      }
       if (shortcutTargets.length <= maxShortcuts) {
         shortcutIndexByWorkspaceKey.set(workspace.workspaceKey, shortcutTargets.length);
       }
     }
   }
 
-  return { shortcutTargets, shortcutIndexByWorkspaceKey };
+  return { shortcutTargets, readyForReviewTargets, shortcutIndexByWorkspaceKey };
 }
 
 export function getRelativeSidebarShortcutTarget(input: {
@@ -105,4 +116,22 @@ export function getRelativeSidebarShortcutTarget(input: {
 
   const nextIndex = (currentIndex + input.delta + input.targets.length) % input.targets.length;
   return input.targets[nextIndex] ?? null;
+}
+
+export function getReviewFirstSidebarShortcutTarget(input: {
+  targets: readonly SidebarShortcutWorkspaceTarget[];
+  readyForReviewTargets: readonly SidebarShortcutWorkspaceTarget[];
+  currentTarget: SidebarShortcutWorkspaceTarget | null;
+  delta: 1 | -1;
+}): SidebarShortcutWorkspaceTarget | null {
+  const reviewTarget =
+    input.readyForReviewTargets[input.delta > 0 ? 0 : input.readyForReviewTargets.length - 1];
+  return (
+    reviewTarget ??
+    getRelativeSidebarShortcutTarget({
+      targets: input.targets,
+      currentTarget: input.currentTarget,
+      delta: input.delta,
+    })
+  );
 }

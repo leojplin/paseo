@@ -18,6 +18,7 @@ function makeCtx(overrides: Partial<ShortcutRoutingContext> = {}): ShortcutRouti
     pathname: "/h/srv/workspace/ws-2",
     isMobile: false,
     sidebarShortcutTargets: SIDEBAR_TARGETS,
+    readyForReviewWorkspaceTargets: [],
     navigationActiveWorkspace: null,
     commandCenterOpen: false,
     shortcutsDialogOpen: false,
@@ -292,6 +293,61 @@ describe("routeKeyboardShortcut — workspace.navigate.relative", () => {
       serverId: "srv",
       workspaceId: "ws-1",
     });
+  });
+});
+
+describe("routeKeyboardShortcut — workspace.navigate.review-relative", () => {
+  const READY_FOR_REVIEW_TARGETS = [
+    { serverId: "srv", workspaceId: "ws-3" },
+    { serverId: "srv", workspaceId: "ws-5" },
+  ] as const;
+
+  it("goes to the first ready-for-review workspace when moving forward", () => {
+    expect(
+      routeKeyboardShortcut(
+        { action: "workspace.navigate.review-relative", payload: { delta: 1 } },
+        makeCtx({ readyForReviewWorkspaceTargets: READY_FOR_REVIEW_TARGETS }),
+      ),
+    ).toEqual<ShortcutAction>({
+      kind: "navigate-workspace",
+      serverId: "srv",
+      workspaceId: "ws-3",
+    });
+  });
+
+  it("goes to the last ready-for-review workspace when moving backward", () => {
+    expect(
+      routeKeyboardShortcut(
+        { action: "workspace.navigate.review-relative", payload: { delta: -1 } },
+        makeCtx({ readyForReviewWorkspaceTargets: READY_FOR_REVIEW_TARGETS }),
+      ),
+    ).toEqual<ShortcutAction>({
+      kind: "navigate-workspace",
+      serverId: "srv",
+      workspaceId: "ws-5",
+    });
+  });
+
+  it("falls back to normal relative navigation when no workspace is ready for review", () => {
+    expect(
+      routeKeyboardShortcut(
+        { action: "workspace.navigate.review-relative", payload: { delta: 1 } },
+        makeCtx({ navigationActiveWorkspace: { serverId: "srv", workspaceId: "ws-2" } }),
+      ),
+    ).toEqual<ShortcutAction>({
+      kind: "navigate-workspace",
+      serverId: "srv",
+      workspaceId: "ws-3",
+    });
+  });
+
+  it("returns none when the review navigation payload is missing", () => {
+    expect(
+      routeKeyboardShortcut(
+        { action: "workspace.navigate.review-relative", payload: null },
+        makeCtx(),
+      ),
+    ).toEqual<ShortcutAction>({ kind: "none" });
   });
 });
 

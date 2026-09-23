@@ -64,6 +64,11 @@ export function buildSidebarProjection(input: SidebarProjectionInput): SidebarPr
   // fall-through to the project rows.
   const workspaceGroups = buildWorkspaceGroups(input, unpinnedWorkspaces);
 
+  const readyForReviewWorkspaceKeys = new Set(
+    Array.from(input.workspaceEntriesByKey.values())
+      .filter((workspace) => workspace.statusBucket === "attention")
+      .map((workspace) => workspace.workspaceKey),
+  );
   const sections: SidebarShortcutSection[] = [];
   if (!input.pinnedCollapsed) {
     sections.push({ workspaces: pinnedGroups.pinnedChats });
@@ -88,7 +93,7 @@ export function buildSidebarProjection(input: SidebarProjectionInput): SidebarPr
     pinnedGroups,
     workspaceGroups,
     projectIconTargets: resolveSidebarProjectIconTargets(input.projects),
-    shortcutModel: buildSidebarShortcutSections({ sections }),
+    shortcutModel: buildSidebarShortcutSections({ sections, readyForReviewWorkspaceKeys }),
   };
 }
 

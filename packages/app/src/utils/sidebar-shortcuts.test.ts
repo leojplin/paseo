@@ -175,6 +175,25 @@ describe("buildSidebarShortcutModel", () => {
     expect(model.shortcutIndexByWorkspaceKey.get("s:ws-10")).toBeUndefined();
   });
 
+  it("keeps ready-for-review targets even when they are beyond the nine numbered targets", () => {
+    const workspaces = Array.from({ length: 10 }, (_, index) =>
+      workspace({
+        serverId: "s",
+        workspaceId: `ws-${index + 1}`,
+        workspaceDirectory: `/repo/w${index + 1}`,
+        name: `w${index + 1}`,
+      }),
+    );
+    const model = buildSidebarShortcutModel({
+      projects: [project("p", workspaces)],
+      collapsedProjectKeys: new Set<string>(),
+      readyForReviewWorkspaceKeys: new Set(["s:ws-10"]),
+    });
+
+    expect(model.shortcutTargets).toHaveLength(10);
+    expect(model.readyForReviewTargets).toEqual([{ serverId: "s", workspaceId: "ws-10" }]);
+  });
+
   it("excludes a collapsed project's workspaces regardless of project kind", () => {
     const gitProject = project("p1", [
       workspace({

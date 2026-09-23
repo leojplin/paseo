@@ -227,6 +227,7 @@ export function useKeyboardShortcuts({
         pathname,
         isMobile,
         sidebarShortcutTargets: store.sidebarShortcutWorkspaceTargets,
+        readyForReviewWorkspaceTargets: store.readyForReviewWorkspaceTargets,
         navigationActiveWorkspace:
           keyboardWorkspaceSelectionRef.current ?? activeWorkspaceSelection,
         commandCenterOpen: store.commandCenterOpen,

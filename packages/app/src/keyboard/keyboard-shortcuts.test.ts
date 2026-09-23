@@ -218,6 +218,18 @@ describe("keyboard-shortcuts", () => {
       payload: { delta: 1 },
     },
     {
+      name: "matches Ctrl+Tab for review-first workspace navigation",
+      event: { key: "Tab", code: "Tab", ctrlKey: true },
+      action: "workspace.navigate.review-relative",
+      payload: { delta: 1 },
+    },
+    {
+      name: "matches Ctrl+Shift+Tab for backwards review-first workspace navigation",
+      event: { key: "Tab", code: "Tab", ctrlKey: true, shiftKey: true },
+      action: "workspace.navigate.review-relative",
+      payload: { delta: -1 },
+    },
+    {
       name: "matches tab relative navigation via Alt+Shift+]",
       event: { key: "}", code: "BracketRight", altKey: true, shiftKey: true },
       action: "workspace.tab.navigate.relative",

@@ -167,6 +167,8 @@ export const SHORTCUT_HELP_ROW_ORDER: Record<ShortcutSectionId, readonly string[
     "workspace-jump-index",
     "workspace-prev",
     "workspace-next",
+    "workspace-review-prev",
+    "workspace-review-next",
     "pin-workspace",
     "archive-workspace",
   ],
@@ -219,6 +221,8 @@ const SHORTCUT_HELP_LABEL_KEYS: Record<string, string> = {
   "workspace-tab-jump-index": "settings.shortcuts.help.jumpToTab",
   "workspace-prev": "settings.shortcuts.help.previousWorkspace",
   "workspace-next": "settings.shortcuts.help.nextWorkspace",
+  "workspace-review-prev": "settings.shortcuts.help.previousWorkspace",
+  "workspace-review-next": "settings.shortcuts.help.nextWorkspace",
   "workspace-tab-prev": "settings.shortcuts.help.previousTab",
   "workspace-tab-next": "settings.shortcuts.help.nextTab",
   "workspace-pane-split-right": "settings.shortcuts.help.splitPaneRight",
@@ -611,6 +615,34 @@ const SHORTCUT_BINDINGS: readonly ShortcutBinding[] = [
       section: "tabs-panes",
       label: "Jump to tab",
       defaultDisplayKeys: ["alt", "shift", "1-9"],
+    },
+  },
+
+  // --- Review-first workspace navigation ---
+  {
+    id: "workspace-navigate-review-relative-ctrl-tab",
+    action: "workspace.navigate.review-relative",
+    combo: "Ctrl+Tab",
+    when: { commandCenter: false },
+    payload: { type: "delta", delta: 1 },
+    help: {
+      id: "workspace-review-next",
+      section: "workspaces",
+      label: "Next workspace (review first)",
+      note: "Prioritizes workspaces ready for review.",
+    },
+  },
+  {
+    id: "workspace-navigate-review-relative-ctrl-shift-tab",
+    action: "workspace.navigate.review-relative",
+    combo: "Ctrl+Shift+Tab",
+    when: { commandCenter: false },
+    payload: { type: "delta", delta: -1 },
+    help: {
+      id: "workspace-review-prev",
+      section: "workspaces",
+      label: "Previous workspace (review first)",
+      note: "Prioritizes workspaces ready for review.",
     },
   },
 

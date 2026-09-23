@@ -7,21 +7,33 @@ export function WorkspaceShortcutTargetsSubscriber({ enabled }: { enabled: boole
   const setSidebarShortcutWorkspaceTargets = useKeyboardShortcutsStore(
     (state) => state.setSidebarShortcutWorkspaceTargets,
   );
+  const setReadyForReviewWorkspaceTargets = useKeyboardShortcutsStore(
+    (state) => state.setReadyForReviewWorkspaceTargets,
+  );
 
   useEffect(() => {
     if (!enabled) {
       setSidebarShortcutWorkspaceTargets([]);
+      setReadyForReviewWorkspaceTargets([]);
       return;
     }
 
     setSidebarShortcutWorkspaceTargets(shortcutModel.shortcutTargets);
-  }, [enabled, setSidebarShortcutWorkspaceTargets, shortcutModel.shortcutTargets]);
+    setReadyForReviewWorkspaceTargets(shortcutModel.readyForReviewTargets);
+  }, [
+    enabled,
+    setReadyForReviewWorkspaceTargets,
+    setSidebarShortcutWorkspaceTargets,
+    shortcutModel.readyForReviewTargets,
+    shortcutModel.shortcutTargets,
+  ]);
 
   useEffect(() => {
     return () => {
       setSidebarShortcutWorkspaceTargets([]);
+      setReadyForReviewWorkspaceTargets([]);
     };
-  }, [setSidebarShortcutWorkspaceTargets]);
+  }, [setReadyForReviewWorkspaceTargets, setSidebarShortcutWorkspaceTargets]);
 
   return null;
 }
