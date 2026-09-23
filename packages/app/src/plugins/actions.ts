@@ -37,6 +37,7 @@ export function createPluginCapabilities(
     navigation: {
       openAgent: navigation.openAgent,
       openWorkspace: navigation.openWorkspace,
+      openNewWorkspace: navigation.openNewWorkspace,
       openWorkspaceAgentCreation: navigation.openWorkspaceAgentCreation,
     },
     rpc: (contract, input) => callPluginRpc(contract, plugin.invoke, input),

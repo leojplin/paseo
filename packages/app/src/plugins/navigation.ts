@@ -9,6 +9,7 @@ import { useWorkspaceDraftSubmissionStore } from "@/stores/workspace-draft-submi
 import { useWorkspaceLayoutStore } from "@/stores/workspace-layout-store";
 import { navigateToAgent } from "@/utils/navigate-to-agent";
 import type { WorkspaceDraftTabSetup } from "@/workspace-tabs/model";
+import { buildNewWorkspaceRoute } from "@/utils/host-routes";
 import { buildPluginSurfaceRoute } from "./routes";
 import type { PluginNavigation } from "./actions";
 
@@ -38,6 +39,14 @@ export function createPluginNavigation(input: {
         serverId: targetServerId ?? serverId,
         workspaceId: targetWorkspaceId,
       });
+    },
+    openNewWorkspace({ serverId: targetServerId, ...options }) {
+      router.push(
+        buildNewWorkspaceRoute({
+          ...options,
+          serverId: targetServerId ?? serverId,
+        }),
+      );
     },
     openWorkspaceAgentCreation({
       draftId: draftIdInput,

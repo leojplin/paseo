@@ -190,6 +190,8 @@ interface NewWorkspaceScreenProps {
   projectId?: string;
   displayName?: string;
   draftId?: string;
+  initialProvider?: string;
+  initialModel?: string;
 }
 
 // A terminal launch sends argv, not a message: there is nothing to attach and
@@ -933,6 +935,14 @@ function buildComposerInitialValues(input: {
   return undefined;
 }
 
+function buildRouteComposerInitialValues(
+  provider: string | undefined,
+  model: string | undefined,
+): CreateAgentInitialValues | undefined {
+  if (!provider || !model) return undefined;
+  return { provider, model };
+}
+
 const pendingWorkspaceSubmissions = new Map<string, Promise<SubmitOutcome>>();
 function runCreateChatAgent(input: CreateChatAgentInput): Promise<SubmitOutcome> {
   const key = JSON.stringify([input.serverId, input.draftId]);
@@ -1049,12 +1059,13 @@ function buildComposerConfig(input: {
   workspaceDirectory: string | null;
   sourceDirectory: string | null;
   initialSetup?: WorkspaceDraftTabSetup | null;
+  initialValues?: CreateAgentInitialValues;
 }): Parameters<typeof useAgentInputDraft>[0]["composer"] {
-  const { serverId, workspaceDirectory, sourceDirectory, initialSetup } = input;
+  const { serverId, workspaceDirectory, sourceDirectory, initialSetup, initialValues } = input;
   const workingDir = workspaceDirectory || sourceDirectory || undefined;
   return {
     initialServerId: serverId || null,
-    initialValues: buildComposerInitialValues({ initialSetup }),
+    initialValues: initialSetup ? buildComposerInitialValues({ initialSetup }) : initialValues,
     initialFeatureValues: initialSetup?.featureValues,
     isVisible: true,
     lockedWorkingDir: workingDir,
@@ -1631,6 +1642,8 @@ export function NewWorkspaceScreen({
   projectId,
   displayName: displayNameProp,
   draftId,
+  initialProvider,
+  initialModel,
 }: NewWorkspaceScreenProps) {
   const queryClient = useQueryClient();
   const { theme } = useUnistyles();
@@ -1765,6 +1778,7 @@ export function NewWorkspaceScreen({
   });
   const draftKey = buildNewWorkspaceDraftKey(draftId);
   const forkDraftSetup = usePendingWorkspaceDraftSetup(draftId);
+  const initialComposerValues = buildRouteComposerInitialValues(initialProvider, initialModel);
   const draftContextScopeKey = useDraftWorkspaceAttachmentScopeKey(draftId);
   const visibleDraftContextScopeKeys = useMemo(
     () => resolveVisibleDraftContextScopeKeys({ isDraftHandoffActive, draftContextScopeKey }),
@@ -1777,6 +1791,7 @@ export function NewWorkspaceScreen({
       workspaceDirectory: workspace?.workspaceDirectory ?? null,
       sourceDirectory: selectedSourceDirectory,
       initialSetup: forkDraftSetup?.setup,
+      initialValues: initialComposerValues,
     }),
   });
   const composerState = chatDraft.composerState;
