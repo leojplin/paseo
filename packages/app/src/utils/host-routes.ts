@@ -438,6 +438,8 @@ interface NewWorkspaceRouteOptions {
   displayName?: string;
   projectId?: string;
   draftId?: string;
+  provider?: string;
+  model?: string;
 }
 
 function buildNewWorkspaceSearch(options: NewWorkspaceRouteOptions): string {
@@ -457,6 +459,12 @@ function buildNewWorkspaceSearch(options: NewWorkspaceRouteOptions): string {
   }
   if (options.draftId) {
     params.set("draftId", options.draftId);
+  }
+  if (options.provider) {
+    params.set("provider", options.provider);
+  }
+  if (options.model) {
+    params.set("model", options.model);
   }
   return params.toString();
 }

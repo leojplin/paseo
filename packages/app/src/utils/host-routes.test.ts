@@ -232,6 +232,17 @@ describe("global routes", () => {
     ).toBe("/new?serverId=local&dir=%2Frepo%2Fproject&name=Project&projectId=project-1");
   });
 
+  it("buildNewWorkspaceRoute carries initial agent defaults", () => {
+    expect(
+      buildNewWorkspaceRoute({
+        serverId: "local",
+        projectId: "project-1",
+        provider: "pi-dev1",
+        model: "model-1",
+      }),
+    ).toBe("/new?serverId=local&projectId=project-1&provider=pi-dev1&model=model-1");
+  });
+
   it("buildNewWorkspaceRoute carries a draft context id", () => {
     expect(
       buildNewWorkspaceRoute({

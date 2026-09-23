@@ -716,9 +716,10 @@ function buildResolvedBuiltinProviders(
 ): Map<string, ResolvedProvider> {
   const resolvedProviders = new Map<string, ResolvedProvider>();
 
-  const definitions = isDev
-    ? [...AGENT_PROVIDER_DEFINITIONS, ...DEV_AGENT_PROVIDER_DEFINITIONS]
-    : AGENT_PROVIDER_DEFINITIONS;
+  const definitions =
+    isDev && process.env.PASEO_DISABLE_MOCK_PROVIDERS !== "1"
+      ? [...AGENT_PROVIDER_DEFINITIONS, ...DEV_AGENT_PROVIDER_DEFINITIONS]
+      : AGENT_PROVIDER_DEFINITIONS;
 
   for (const definition of definitions) {
     const override = providerOverrides[definition.id];

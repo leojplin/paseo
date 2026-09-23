@@ -43,6 +43,15 @@ export interface PluginNavigationTarget {
 }
 
 export interface PluginCommandNavigationTarget extends PluginNavigationTarget {
+  /** Opens the New workspace screen with optional project and agent defaults. */
+  readonly openNewWorkspace?: (input: {
+    readonly serverId?: string;
+    readonly sourceDirectory?: string;
+    readonly projectId?: string;
+    readonly displayName?: string;
+    readonly provider?: string;
+    readonly model?: string;
+  }) => void;
   /** Opens a workspace immediately and retargets its draft tab when agent creation finishes. */
   readonly openWorkspaceAgentCreation?: (input: {
     readonly draftId: string;
