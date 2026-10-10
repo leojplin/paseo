@@ -74,6 +74,7 @@ import {
   SidebarWorkspaceMenu,
 } from "@/components/sidebar/sidebar-workspace-menu";
 import { SidebarSectionHeader } from "@/components/sidebar/sidebar-section-header";
+import { SidebarWorkspaceArchiveButton } from "@/components/sidebar/sidebar-workspace-archive-button";
 import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle-row";
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
 import type { ToggleSidebarWorkspacePin } from "@/hooks/use-sidebar-workspace-pin";
@@ -994,25 +995,31 @@ function StatusWorkspaceActionSlot({
         scrimBackdrop={showScrim ? backdrop : undefined}
       >
         {kebab.showKebab && onArchive ? (
-          <SidebarWorkspaceMenu
-            {...kebab.menuProps}
-            workspaceKey={workspace.workspaceKey}
-            serverId={workspace.serverId}
-            workspaceId={workspace.workspaceId}
-            workspaceLabels={workspace.labels}
-            onCopyPath={onCopyPath}
-            onCopyBranchName={onCopyBranchName}
-            onRename={onRename}
-            onMarkAsRead={onMarkAsRead}
-            onMarkAsUnread={onMarkAsUnread}
-            onArchive={onArchive}
-            archiveLabel={archiveLabel}
-            archiveStatus={archiveStatus}
-            archivePendingLabel={archivePendingLabel}
-            archiveShortcutKeys={archiveShortcutKeys}
-            isPinned={isPinned}
-            onTogglePin={onTogglePin}
-          />
+          <View style={styles.trailingActionsRow}>
+            <SidebarWorkspaceArchiveButton
+              workspaceKey={workspace.workspaceKey}
+              onArchive={onArchive}
+            />
+            <SidebarWorkspaceMenu
+              {...kebab.menuProps}
+              workspaceKey={workspace.workspaceKey}
+              serverId={workspace.serverId}
+              workspaceId={workspace.workspaceId}
+              workspaceLabels={workspace.labels}
+              onCopyPath={onCopyPath}
+              onCopyBranchName={onCopyBranchName}
+              onRename={onRename}
+              onMarkAsRead={onMarkAsRead}
+              onMarkAsUnread={onMarkAsUnread}
+              onArchive={onArchive}
+              archiveLabel={archiveLabel}
+              archiveStatus={archiveStatus}
+              archivePendingLabel={archivePendingLabel}
+              archiveShortcutKeys={archiveShortcutKeys}
+              isPinned={isPinned}
+              onTogglePin={onTogglePin}
+            />
+          </View>
         ) : null}
       </SidebarWorkspaceTrailingActionOverlay>
     </SidebarWorkspaceTrailingActionSlot>
@@ -1045,6 +1052,11 @@ function getStatusWorkspaceRowStyle({
 const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
+  },
+  // The × sits beside the kebab on the same hover-revealed rail.
+  trailingActionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   list: {
     flex: 1,

@@ -310,7 +310,9 @@ export const sidebarWorkspaceRowStyles = StyleSheet.create((theme) => ({
   },
   hidden: { opacity: 0 },
   // Stays position:relative at zero width so the absolutely-positioned kebab keeps
-  // anchoring to the same right edge whether or not the slot holds anything.
+  // anchoring to the same right edge whether or not the slot holds anything. The reserved
+  // variant is wide enough for the archive × + kebab cluster (≈31px painted) so a long
+  // title truncates before reaching the buttons instead of running underneath them.
   trailingActionSlot: {
     position: "relative",
     minHeight: 20,
@@ -320,7 +322,7 @@ export const sidebarWorkspaceRowStyles = StyleSheet.create((theme) => ({
   },
   trailingActionSlotReserved: {
     position: "relative",
-    minWidth: 18,
+    minWidth: 34,
     minHeight: 20,
     flexShrink: 0,
     alignItems: "flex-end",
@@ -389,11 +391,12 @@ export function resolveTrailingActionVisibility({
     // touch, which shows the kebab without ever hovering, never gets one.
     showScrim: showKebab && isHovered,
     renderSlot: hasArchiveAction || hasTrailing,
-    // The slot only holds width for something that permanently sits in it. Trailing content
-    // does; the kebab only does on touch, where there is no hover for it to appear on and so
-    // no scrim to let it overlay the title. Everywhere else the width goes back to the title
-    // and the kebab fades in over its tail.
-    reserveSlotWidth: hasContent || (hasArchiveAction && isTouchPlatform),
+    // The slot holds width for whatever permanently or on hover sits in it: trailing content
+    // (diff stat), and the archive × + kebab cluster, which fades in on hover on desktop and
+    // is permanent on touch. Reserving the cluster's width keeps the title from running under
+    // the buttons — it truncates against the gutter instead of being overlaid. Shortcut
+    // hints temporarily replace the cluster, so the slot hands its width back to them.
+    reserveSlotWidth: hasContent || (hasArchiveAction && !showShortcut),
   };
 }
 
