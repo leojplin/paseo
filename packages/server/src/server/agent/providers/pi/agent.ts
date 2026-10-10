@@ -42,6 +42,8 @@ import {
   type ProviderRefreshContext,
 } from "../../agent-sdk-types.js";
 import { importSessionFromPersistence } from "../../provider-session-import.js";
+import type { AgentResumeSessionOptions } from "../../agent-sdk-types.js";
+import { PiHistorySession } from "./history-session.js";
 import { runProviderRefreshActivity } from "../../provider-refresh-deadline.js";
 import { runProviderTurn } from "../provider-runner.js";
 import {
@@ -214,6 +216,7 @@ function capabilitiesForClient(): AgentCapabilityFlags {
 function capabilitiesForSession(hasMcpConfig: boolean): AgentCapabilityFlags {
   return withPiCapabilities(hasMcpConfig);
 }
+export { capabilitiesForSession };
 
 interface StartTurnResult {
   turnId: string;
@@ -2557,6 +2560,7 @@ export class PiRpcAgentClient implements AgentClient {
     handle: AgentPersistenceHandle,
     overrides?: Partial<AgentSessionConfig>,
     launchContext?: AgentLaunchContext,
+    resumeOptions?: AgentResumeSessionOptions,
   ): Promise<AgentSession> {
     const sessionFile = handle.nativeHandle;
     if (!sessionFile) {
@@ -2566,6 +2570,67 @@ export class PiRpcAgentClient implements AgentClient {
     const persistenceMetadata = parsePersistenceMetadata(handle.metadata);
     const resumeConfig = buildResumeConfig(persistenceMetadata, overrides, this.provider);
 
+    if (resumeOptions?.purpose === "history") {
+      // History loads (archived agents whose timeline a client is viewing) must not
+      // start a provider runtime. Replay the persisted session file instead, falling
+      // back to a bounded runtime read only when the file is unreadable from here.
+      return new PiHistorySession({
+        provider: this.provider,
+        handle,
+        config: resumeConfig.config,
+        // History reads nothing interactive, but claiming MCP support keeps the
+        // manager from rejecting an archived agent merely because its stored config
+        // references MCP servers the passive session will never touch.
+        capabilities: capabilitiesForSession(true),
+        logger: this.logger,
+        readMessagesFallback: async () => {
+          const started = await this.startResumedRuntime(resumeConfig, sessionFile, launchContext);
+          try {
+            return await started.runtimeSession.getMessages();
+          } finally {
+            await started.cleanup();
+          }
+        },
+      });
+    }
+
+    const started = await this.startResumedRuntime(resumeConfig, sessionFile, launchContext);
+    try {
+      const initialState = await this.applyResumeModel(started.runtimeSession, resumeConfig.model);
+      return new PiRpcAgentSession({
+        runtimeSession: started.runtimeSession,
+        config: {
+          ...resumeConfig.config,
+          model: modelToId(initialState.model) ?? resumeConfig.config.model,
+        },
+        initialState,
+        capabilities: capabilitiesForSession(started.hasMcp),
+        cleanup: combineCleanup([started.cleanup]),
+        extensionTimeoutMs: started.providerOptions.extensionTimeoutMs,
+        logger: this.logger,
+        usagePollScheduler: this.usagePollScheduler,
+      });
+    } catch (error) {
+      await started.cleanup();
+      throw error;
+    }
+  }
+
+  /**
+   * Start a resumed Pi runtime for an interactive session. Split out so the history
+   * fallback can perform the same bounded read (start, read messages, close) without
+   * duplicating the launch plumbing.
+   */
+  private async startResumedRuntime(
+    resumeConfig: PiResumeConfig,
+    sessionFile: string,
+    launchContext?: AgentLaunchContext,
+  ): Promise<{
+    runtimeSession: PiRuntimeSession;
+    providerOptions: z.infer<typeof PiProviderOptionsSchema>;
+    hasMcp: boolean;
+    cleanup: () => Promise<void>;
+  }> {
     const providerOptions = PiProviderOptionsSchema.parse(
       resumeConfig.config.providerOptions ?? {},
     );
@@ -2604,27 +2669,16 @@ export class PiRpcAgentClient implements AgentClient {
       paseoExtension?.cleanup();
       throw error;
     }
-    try {
-      const initialState = await this.applyResumeModel(runtimeSession, resumeConfig.model);
-      return new PiRpcAgentSession({
-        runtimeSession,
-        config: {
-          ...resumeConfig.config,
-          model: modelToId(initialState.model) ?? resumeConfig.config.model,
-        },
-        initialState,
-        capabilities: capabilitiesForSession(mcp !== null),
-        cleanup: combineCleanup([mcpConfigFile?.cleanup, paseoExtension?.cleanup]),
-        extensionTimeoutMs: providerOptions.extensionTimeoutMs,
-        logger: this.logger,
-        usagePollScheduler: this.usagePollScheduler,
-      });
-    } catch (error) {
-      await runtimeSession.close().catch(() => undefined);
-      mcpConfigFile?.cleanup();
-      paseoExtension?.cleanup();
-      throw error;
-    }
+    return {
+      runtimeSession,
+      providerOptions,
+      hasMcp: mcp !== null,
+      cleanup: async () => {
+        await runtimeSession.close().catch(() => undefined);
+        mcpConfigFile?.cleanup();
+        paseoExtension?.cleanup();
+      },
+    };
   }
 
   // Pi resumes a session on the model it recorded, or on its default when that model
