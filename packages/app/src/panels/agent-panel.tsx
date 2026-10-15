@@ -39,6 +39,7 @@ import {
 } from "@/composer/pill-styles";
 import { getActiveMessageSubmissions } from "@/composer/submission/model";
 import { RewindComposerRestoreProvider } from "@/components/rewind/composer-restore";
+import { useRewindAgentMutation } from "@/components/rewind/use-rewind-agent-mutation";
 import { useProviderIcon } from "@/components/provider-icons";
 import { useToastHost, type ToastApi, type ToastState } from "@/components/toast-host";
 import type { WorkspaceComposerAttachment } from "@/attachments/types";
@@ -57,6 +58,7 @@ import {
 } from "@/hooks/use-agent-screen-state-machine";
 import { useArchiveAgent } from "@/hooks/use-archive-agent";
 import { useContainerWidthBelow } from "@/hooks/use-container-width";
+import { useKeyboardActionHandler } from "@/hooks/use-keyboard-action-handler";
 import { reconcileMissingAgentStateWithPresentAgent } from "@/panels/agent-panel-load-state";
 import { TimelineSyncStatus } from "@/timeline/sync-status";
 import { usePaneContext, usePaneFocus } from "@/panels/pane-context";
@@ -1258,6 +1260,7 @@ const ChatAgentReadyContent = memo(function ChatAgentReadyContent({
           workspaceId={workspaceId}
           agentId={agentId}
           agent={effectiveAgent}
+          isPaneFocused={isPaneFocused}
           routeBottomAnchorRequest={routeBottomAnchorRequest}
           hasAppliedAuthoritativeHistory={hasAppliedAuthoritativeHistory}
           hasActiveComposer={hasActiveComposer}
@@ -1415,6 +1418,7 @@ const AgentStreamSection = memo(function AgentStreamSection({
   workspaceId,
   agentId,
   agent,
+  isPaneFocused,
   routeBottomAnchorRequest,
   hasAppliedAuthoritativeHistory,
   hasActiveComposer,
@@ -1427,6 +1431,7 @@ const AgentStreamSection = memo(function AgentStreamSection({
   workspaceId: string;
   agentId?: string;
   agent: AgentScreenAgent;
+  isPaneFocused: boolean;
   routeBottomAnchorRequest: RouteBottomAnchorRequest;
   hasAppliedAuthoritativeHistory: boolean;
   hasActiveComposer: boolean;
@@ -1462,6 +1467,46 @@ const AgentStreamSection = memo(function AgentStreamSection({
     ),
   );
   const streamItems = streamItemsRaw ?? EMPTY_STREAM_ITEMS;
+  const streamHead = useSessionStore((state) =>
+    agentId ? state.sessions[serverId]?.agentStreamHead?.get(agentId) : undefined,
+  );
+  const client = useSessionStore((state) => state.sessions[serverId]?.client ?? null);
+  const lastUserMessage = useMemo(
+    () =>
+      [...streamItems, ...(streamHead ?? [])].findLast(
+        (item): item is Extract<StreamItem, { kind: "user_message" }> =>
+          item.kind === "user_message",
+      ),
+    [streamHead, streamItems],
+  );
+  const rewindMutation = useRewindAgentMutation({
+    serverId,
+    agentId: agent.id,
+    messageId: lastUserMessage?.messageId,
+    client,
+  });
+  useKeyboardActionHandler({
+    handlerId: `agent-rewind-last:${serverId}:${agent.id}`,
+    actions: ["agent.rewind-last"],
+    enabled:
+      isPaneFocused &&
+      hasActiveComposer &&
+      client !== null &&
+      !rewindMutation.isPending &&
+      agent.capabilities?.supportsRewindConversation === true &&
+      Boolean(lastUserMessage?.messageId),
+    priority: 100,
+    handle: (action) => {
+      if (action.id !== "agent.rewind-last" || !lastUserMessage?.messageId) {
+        return false;
+      }
+      void rewindMutation.rewindAgent({
+        mode: "conversation",
+        rewoundText: lastUserMessage.text,
+      });
+      return true;
+    },
+  });
   const pendingPermissionList = useStoreWithEqualityFn(
     useSessionStore,
     (state) => {

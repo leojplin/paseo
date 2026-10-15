@@ -202,6 +202,7 @@ export const SHORTCUT_HELP_ROW_ORDER: Record<ShortcutSectionId, readonly string[
     "cycle-agent-mode",
     "voice-toggle",
     "dictation-toggle",
+    "rewind-last-prompt",
     "agent-interrupt",
     "voice-mute-toggle",
   ],
@@ -252,6 +253,7 @@ const SHORTCUT_HELP_LABEL_KEYS: Record<string, string> = {
   "cycle-agent-mode": "settings.shortcuts.help.cycleAgentMode",
   "voice-toggle": "settings.shortcuts.help.toggleVoiceMode",
   "dictation-toggle": "settings.shortcuts.help.startStopDictation",
+  "rewind-last-prompt": "rewind.actions.conversation",
   "agent-interrupt": "settings.shortcuts.help.interruptAgent",
   "voice-mute-toggle": "settings.shortcuts.help.muteUnmuteVoiceMode",
 };
@@ -1195,6 +1197,28 @@ const SHORTCUT_BINDINGS: readonly ShortcutBinding[] = [
       id: "dictation-toggle",
       section: "agent-input",
       label: "Start/stop dictation",
+    },
+  },
+  {
+    id: "agent-rewind-last-cmd-shift-z-mac",
+    action: "agent.rewind-last",
+    combo: "Cmd+Shift+Z",
+    when: { mac: true, commandCenter: false, terminal: false },
+    help: {
+      id: "rewind-last-prompt",
+      section: "agent-input",
+      label: "Rewind last prompt",
+    },
+  },
+  {
+    id: "agent-rewind-last-ctrl-shift-z-non-mac",
+    action: "agent.rewind-last",
+    combo: "Ctrl+Shift+Z",
+    when: { mac: false, commandCenter: false, terminal: false },
+    help: {
+      id: "rewind-last-prompt",
+      section: "agent-input",
+      label: "Rewind last prompt",
     },
   },
   {

@@ -354,6 +354,18 @@ describe("keyboard-shortcuts", () => {
       preventDefault: false,
       stopPropagation: false,
     },
+    {
+      name: "routes Cmd+Shift+Z to rewind the last prompt on macOS",
+      event: { key: "z", code: "KeyZ", metaKey: true, shiftKey: true },
+      context: { isMac: true, focusScope: "message-input" },
+      action: "agent.rewind-last",
+    },
+    {
+      name: "routes Ctrl+Shift+Z to rewind the last prompt on non-mac",
+      event: { key: "z", code: "KeyZ", ctrlKey: true, shiftKey: true },
+      context: { isMac: false, focusScope: "message-input" },
+      action: "agent.rewind-last",
+    },
     // macOS rewrites event.key when Option is held (Option+T -> "†",
     // Option+[ -> "“", Option+Shift+W -> "„", etc.). Every Alt-bound
     // letter / bracket shortcut must still resolve.
