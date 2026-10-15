@@ -3,12 +3,14 @@ import { connectToDaemon, getDaemonHost } from "../../utils/client.js";
 import { resolveCallerAgentId } from "../../utils/caller-agent.js";
 import type { CommandError, CommandOptions, SingleResult } from "../../output/index.js";
 import { toWorkspaceRow, workspaceSchema, type WorkspaceRow } from "./shared.js";
+import { resolveWorkspaceLabels } from "./label.js";
 
 export interface WorkspaceCreateOptions extends CommandOptions {
   isolation?: string;
   path?: string;
   project?: string;
   title?: string;
+  labels?: string[];
   mode?: string;
   worktreeSlug?: string;
   newBranch?: string;
@@ -155,6 +157,28 @@ export async function runCreateCommand(
     });
     if (!payload.workspace) {
       throw new Error(payload.error ?? "Workspace creation failed");
+    }
+    const workspaceId = payload.workspace.id;
+    if (options.labels?.length) {
+      try {
+        const catalog = await client.listWorkspaceLabels();
+        const resolved = resolveWorkspaceLabels({
+          requested: options.labels,
+          catalog: catalog.labels,
+        });
+        for (const label of resolved) {
+          await client.setWorkspaceLabel({ workspaceId, label, assigned: true });
+        }
+      } catch (error) {
+        if (error && typeof error === "object" && "code" in error) throw error;
+        const message = error instanceof Error ? error.message : String(error);
+        // The workspace exists at this point — make that unmissable so callers
+        // reconcile instead of recreating it.
+        throw {
+          code: "WORKSPACE_LABEL_FAILED",
+          message: `Workspace ${workspaceId} was created, but labeling failed: ${message}`,
+        } satisfies CommandError;
+      }
     }
     return { type: "single", data: toWorkspaceRow(payload.workspace), schema: workspaceSchema };
   } catch (error) {

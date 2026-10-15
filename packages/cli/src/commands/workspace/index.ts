@@ -3,6 +3,7 @@ import { withOutput } from "../../output/index.js";
 import { addJsonAndDaemonHostOptions } from "../../utils/command-options.js";
 import { runArchiveCommand } from "./archive.js";
 import { runCreateCommand } from "./create.js";
+import { runLabelCreateCommand, runLabelListCommand, runLabelSetCommand } from "./label.js";
 import { runLsCommand } from "./ls.js";
 import { runRenameCommand } from "./rename.js";
 import { runSetupCommand } from "./setup.js";
@@ -25,6 +26,12 @@ export function createWorkspaceCommand(): Command {
       .option("--path <path>", "Local directory or source checkout (default: current)")
       .option("--project <id>", "Existing project id")
       .option("--title <title>", "Workspace title")
+      .option(
+        "--label <name>",
+        "Assign this label to the workspace after creation (repeatable)",
+        (value: string, previous: string[]) => [...(previous ?? []), value],
+        undefined as unknown as string[] | undefined,
+      )
       .option(
         "--mode <mode>",
         "Worktree mode: branch-off, checkout-branch, or checkout-pr (default: branch-off)",
@@ -64,6 +71,30 @@ export function createWorkspaceCommand(): Command {
       .description("Archive a workspace and everything it owns")
       .argument("<workspace-id>", "Workspace id"),
   ).action(withOutput(runArchiveCommand));
+
+  const label = workspace.command("label").description("Manage workspace labels");
+
+  addJsonAndDaemonHostOptions(label.command("ls").description("List workspace labels")).action(
+    withOutput(runLabelListCommand),
+  );
+
+  addJsonAndDaemonHostOptions(
+    label
+      .command("create")
+      .description("Create or update a workspace label")
+      .argument("<name>", "Label name")
+      .option("--color <color>", "Label color"),
+  ).action(withOutput(runLabelCreateCommand));
+
+  addJsonAndDaemonHostOptions(
+    label
+      .command("set")
+      .description("Assign or remove labels on a workspace")
+      .argument("<workspace-id>", "Workspace id")
+      .argument("<name...>", "Label name(s)")
+      .option("--remove", "Remove the labels instead of assigning them")
+      .allowExcessArguments(false),
+  ).action(withOutput(runLabelSetCommand));
 
   return workspace;
 }
