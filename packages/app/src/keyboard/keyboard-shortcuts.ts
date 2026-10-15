@@ -170,6 +170,7 @@ export const SHORTCUT_HELP_ROW_ORDER: Record<ShortcutSectionId, readonly string[
     "workspace-review-prev",
     "workspace-review-next",
     "pin-workspace",
+    "fork-workspace",
     "archive-workspace",
   ],
   "tabs-panes": [
@@ -211,6 +212,7 @@ const SHORTCUT_HELP_LABEL_KEYS: Record<string, string> = {
   "new-workspace": "settings.shortcuts.help.newWorkspace",
   "switch-project": "settings.shortcuts.help.switchProject",
   "archive-workspace": "settings.shortcuts.help.archiveWorkspace",
+  "fork-workspace": "settings.shortcuts.help.forkWorkspace",
   "workspace-tab-new": "settings.shortcuts.help.newTab",
   "workspace-tab-target-agent": "workspace.tabs.actions.newAgent",
   "workspace-tab-target-browser": "workspace.tabs.actions.newBrowser",
@@ -386,6 +388,30 @@ const SHORTCUT_BINDINGS: readonly ShortcutBinding[] = [
       id: "pin-workspace",
       section: "workspaces",
       label: "Pin chat",
+    },
+  },
+
+  // --- Fork workspace ---
+  {
+    id: "workspace-fork-cmd-shift-f-mac",
+    action: "workspace.fork",
+    combo: "Cmd+Shift+F",
+    when: { mac: true, commandCenter: false },
+    help: {
+      id: "fork-workspace",
+      section: "workspaces",
+      label: "Fork workspace",
+    },
+  },
+  {
+    id: "workspace-fork-ctrl-shift-f-non-mac",
+    action: "workspace.fork",
+    combo: "Ctrl+Shift+F",
+    when: { mac: false, commandCenter: false, terminal: false },
+    help: {
+      id: "fork-workspace",
+      section: "workspaces",
+      label: "Fork workspace",
     },
   },
 
@@ -1036,7 +1062,10 @@ const SHORTCUT_BINDINGS: readonly ShortcutBinding[] = [
   {
     id: "view-toggle-focus-cmd-shift-f-mac",
     action: "view.toggle.focus",
-    combo: "Cmd+Shift+F",
+    // Moved from Cmd+Shift+F when fork workspace claimed it. The binding id keeps its original
+    // "cmd-shift-f" name: user shortcut overrides are keyed by binding id, so renaming it would
+    // silently drop a user's customized focus-mode shortcut on upgrade.
+    combo: "Cmd+Ctrl+F",
     when: { mac: true, commandCenter: false },
     help: {
       id: "toggle-focus",
@@ -1047,7 +1076,7 @@ const SHORTCUT_BINDINGS: readonly ShortcutBinding[] = [
   {
     id: "view-toggle-focus-ctrl-shift-f-non-mac",
     action: "view.toggle.focus",
-    combo: "Ctrl+Shift+F",
+    combo: "Ctrl+Alt+F",
     when: { mac: false, commandCenter: false, terminal: false },
     help: {
       id: "toggle-focus",
